@@ -1,16 +1,27 @@
-import React,{ useEffect } from "react";
+import React, { useEffect } from "react";
 import { Formik, useFormik } from "formik";
-import{useDispatch, useSelector} from 'react-redux';
-import Dropzone from 'react-dropzone';
-import {Navigate} from 'react-router-dom';
-import {Container, Card,Button,Input,Textarea, Loading,Text,Spacer, Progress} from "@nextui-org/react";
-import styled from 'styled-components';
+import { useDispatch, useSelector } from "react-redux";
+import Dropzone from "react-dropzone";
+import { Navigate } from "react-router-dom";
+import {
+  Container,
+  Card,
+  Button,
+  Input,
+  Textarea,
+  Loading,
+  Text,
+  Spacer,
+  Progress,
+} from "@nextui-org/react";
+import styled from "styled-components";
 import * as Yup from "yup";
 import { createPostAction } from "../../redux/slices/posts/postSlices";
 import CategorySelector from "../categorySelector/CategorySelector";
 import { fecthCategoriesAction } from "../../redux/slices/category/categorySlice";
 import { CreatesocietyAction } from "../../redux/slices/Societies/SocietySlices";
-
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 //form schema
 const formSchema = Yup.object({
@@ -18,8 +29,6 @@ const formSchema = Yup.object({
   description: Yup.string().required("description is required"),
   handle: Yup.string().required("description is required"),
   image: Yup.string().required("description is required"),
-
-  
 });
 
 //css for drop zone
@@ -38,135 +47,162 @@ const formSchema = Yup.object({
 //   transition: border 0.24s ease-in-out;
 // `;
 
-
-
-
-
 export default function CreatePost(props) {
-  const dispatch=useDispatch();
-
+  const dispatch = useDispatch();
 
   //select store data
-  const society =useSelector(state=>state?.society);
-  const {isCreated,loading,appErr,serverErr}=society;
-
-
+  const society = useSelector((state) => state?.society);
+  const { societyCreated, loading, appErr, serverErr } = society;
 
   const formik = useFormik({
     initialValues: {
       title: "",
-      description:'' ,
-      handle:'',
-      image:''
-    
-      
+      description: "",
+      handle: "",
+      image: "",
     },
-    onSubmit: values => {
-      const data={
-        title:values?.title,
-        description:values.description,
-        handle:values.handle,
-        image:values.image
-      }
+    onSubmit: (values) => {
+      const data = {
+        title: values?.title,
+        description: values.description,
+        handle: values.handle,
+        image: values.image,
+      };
       //dispath the action
-    dispatch(CreatesocietyAction(data));
-    console.log(data);
+      dispatch(CreatesocietyAction(data));
+      console.log(data);
     },
     validationSchema: formSchema,
   });
- 
- 
-  if(isCreated){
-    return <Navigate to='/posts'/>
+
+  if (societyCreated) {
+    toast.success("🦄 Wow so easy!", {
+      position: "bottom-center",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "colored",
+    });
   }
 
-
-    return (
-      
-      
-      <>
-        <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-          <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          {loading? <Progress
-          indeterminated
-          value={50}
-          color="secondary"
-          status="secondary"
-        />:null} 
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-300">
-              Create And manage your Societies 
-            </h2>
-     
-            <p className="mt-2 text-center text-sm text-gray-600">
-              <p className="font-medium text-green-600 hover:text-indigo-500">
-              Societies give power to collaborate communicate and track your Coummunity social presence 
-              </p>
-              <Spacer y={1} />
-           
-              {serverErr || appErr ? <Text color="error" size={20} >{serverErr}-😬{appErr}</Text> :null }
-               <Spacer y={1} />
-            </p>
+  return (
+    <>
+      <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div className="sm:mx-auto sm:w-full sm:max-w-md">
+          <div>
+            <ToastContainer
+              position="bottom-center"
+              autoClose={5000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="colored"
+            />
           </div>
-          <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-            <div className=" py-8 px-4 shadow sm:rounded-lg sm:px-10">
-              <form onSubmit={formik.handleSubmit} className="space-y-6">
-                <div>
-               
-                  <div className="mt-1">
-                    {/* Title */}
-                    <Input
-                      label="Title"
+          {loading ? (
+            <Progress
+              indeterminated
+              value={50}
+              color="secondary"
+              status="secondary"
+            />
+          ) : null}
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-300">
+            Create And manage your Societies
+          </h2>
+
+          <p className="mt-2 text-center text-sm text-gray-600">
+            <p className="font-medium text-green-600 hover:text-indigo-500">
+              Societies give power to collaborate communicate and track your
+              Coummunity social presence
+            </p>
+            <Spacer y={1} />
+
+            {serverErr || appErr ? (
+              <Text color="error" size={20}>
+                {serverErr}-😬{appErr}
+              </Text>
+            ) : null}
+            {serverErr || appErr
+              ? toast.error(`${serverErr}-😬${appErr}`, {
+                  position: "top-right",
+                  autoClose: 5000,
+                  hideProgressBar: false,
+                  closeOnClick: true,
+                  pauseOnHover: true,
+                  draggable: true,
+                  progress: undefined,
+                  theme: "colored",
+                })
+              : null}
+
+            <Spacer y={1} />
+          </p>
+        </div>
+        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+          <div className=" py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <form onSubmit={formik.handleSubmit} className="space-y-6">
+              <div>
+                <div className="mt-1">
+                  {/* Title */}
+                  <Input
+                    label="Title"
                     value={formik.values.title}
                     onChange={formik.handleChange("title")}
                     onBlur={formik.handleBlur("title")}
-                      id="title"
-                      name="title"
-                      type="title"
-                      autoComplete="title"
-                      bordered 
-         
-          color="primary"        
-                    />
-                  </div>
-                  <div className="mt-1">
-                    {/* Title */}
-                    <Spacer y={1} />
-                    {serverErr || appErr ? <Input
-                    labelLeft="@"
-                    value={formik.values.handle}
-                    onChange={formik.handleChange("handle")}
-                    onBlur={formik.handleBlur("handle")}
+                    id="title"
+                    name="title"
+                    type="title"
+                    autoComplete="title"
+                    bordered
+                    color="primary"
+                  />
+                </div>
+                <div className="mt-1">
+                  {/* Title */}
+                  <Spacer y={1} />
+                  {serverErr || appErr ? (
+                    <Input
+                      labelLeft="@"
+                      value={formik.values.handle}
+                      onChange={formik.handleChange("handle")}
+                      onBlur={formik.handleBlur("handle")}
                       id="handle"
                       name="handle"
-                      
                       clearable
-                      bordered 
-          label="Handle" 
-          color="error"
-          status="error"        
-                    /> :<Input
-                    labelLeft="@"
-                    value={formik.values.handle}
-                    onChange={formik.handleChange("handle")}
-                    onBlur={formik.handleBlur("handle")}
+                      bordered
+                      label="Handle"
+                      color="error"
+                      status="error"
+                    />
+                  ) : (
+                    <Input
+                      labelLeft="@"
+                      value={formik.values.handle}
+                      onChange={formik.handleChange("handle")}
+                      onBlur={formik.handleBlur("handle")}
                       id="handle"
                       name="handle"
-                      
-                      
-                      bordered 
-          label="Handle" 
-          color="primary"        
-                    /> }
-                    
-                  </div>
+                      bordered
+                      label="Handle"
+                      color="primary"
+                    />
+                  )}
+                </div>
 
-                  <div>
-                  <Spacer x={5}/>
+                <div>
+                  <Spacer x={5} />
                   <Dropzone
                     onBlur={formik.handleBlur("image")}
                     accept="image/*,audio/*,video/*"
-                    
-                    onDrop={acceptedFiles => {
+                    onDrop={(acceptedFiles) => {
                       formik.setFieldValue("image", acceptedFiles[0]);
                     }}
                   >
@@ -175,68 +211,69 @@ export default function CreatePost(props) {
                         <div
                           {...getRootProps({
                             className: "dropzone",
-                            onDrop: event => event.stopPropagation(),
+                            onDrop: (event) => event.stopPropagation(),
                           })}
                         >
                           <input {...getInputProps()} />
                           <p className="text-gray-300 text-lg cursor-pointer hover:text-gray-500">
-                           <Text color="success"> select image or a video</Text> 
+                            <Text color="success">
+                              {" "}
+                              select image or a video
+                            </Text>
                           </p>
                         </div>
                       </div>
                     )}
                   </Dropzone>
-                  </div>
-                  {/* Err msg */}
-                  <div className="text-red-500">
-                    {formik.touched.title && formik.errors.title && formik.touched.errors?.title} 
-                  </div>
                 </div>
+                {/* Err msg */}
+                <div className="text-red-500">
+                  {formik.touched.title &&
+                    formik.errors.title &&
+                    formik.touched.errors?.title}
+                </div>
+              </div>
 
-  
-    <Spacer x={20}/>
-    
-                <div>
-                  {/* Description */}
-                  <Textarea
+              <Spacer x={20} />
+
+              <div>
+                {/* Description */}
+                <Textarea
                   value={formik.values.description}
                   onChange={formik.handleChange("description")}
                   onBlur={formik.handleBlur("description")}
-                    rows="5"
-                    cols="50"
-                    bordered
-                    color="secondary"
-                   labelPlaceholder="Description"
-                    type="text"
-                  ></Textarea>
-                  {/* image upload*/ }
-                  <Spacer x={5}/>
+                  rows="5"
+                  cols="50"
+                  bordered
+                  color="secondary"
+                  labelPlaceholder="Description"
+                  type="text"
+                ></Textarea>
+                {/* image upload*/}
+                <Spacer x={5} />
 
-                  {/* Err msg */}               
-                </div> 
-                <div>
-                  {/* Submit btn */}
-                  {loading?  <Button
-                    disabled
-                    color='secondary'
-                  >
-                                      <Loading type="points-opacity" color="currentColor" size="sm" />
-
-                  </Button> :
-                   <Button
-                  type="submit"
-                  color='secondary'
-                 >
-                  Create Post
-                 </Button>}
-
-       
-                </div>
-              </form>
-            </div>
+                {/* Err msg */}
+              </div>
+              <div>
+                {/* Submit btn */}
+                {loading ? (
+                  <Button disabled color="secondary">
+                    <Loading
+                      type="points-opacity"
+                      color="currentColor"
+                      size="sm"
+                    />
+                  </Button>
+                ) : (
+                  <Button type="submit" color="secondary">
+                    Create Post
+                  </Button>
+                )}
+              </div>
+            </form>
           </div>
         </div>
-      </>
-    );
-  }
-  
+      </div>
+    </>
+  );
+}
